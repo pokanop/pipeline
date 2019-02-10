@@ -43,7 +43,7 @@ func TestReplicated(t *testing.T) {
 		ctx := &Context{context.Background(), nil}
 		n := (<-step.Process(ctx, in)).(int)
 		if n != 25 {
-			t.Fatalf("step should have multipled num to 25, found %d", n)
+			t.Fatalf("step should have multiplied num to 25, found %d", n)
 		}
 		step.Wait()
 	}
@@ -77,7 +77,7 @@ func TestWorkerCount(t *testing.T) {
 	for i := 0; i < iters; i++ {
 		n := (<-out).(int)
 		if n != 25 {
-			t.Fatalf("step should have multipled num to 25, found %d", n)
+			t.Fatalf("step should have multiplied num to 25, found %d", n)
 		}
 	}
 	cancel()
