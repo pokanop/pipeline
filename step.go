@@ -19,9 +19,9 @@ type StepFn func(*Context, <-chan interface{}, chan interface{}) error
 // Step is the main type for processing in a pipeline.
 type Step struct {
 	tomb.Tomb
-	// Name is the name of the step
+	// Name of the step.
 	Name string
-	// Buffered indicates if the process' out channel will be buffered
+	// Buffered indicates if the process' out channel will be buffered.
 	// to allow sending more data before blocking.
 	// Defaults to false
 	Buffered bool

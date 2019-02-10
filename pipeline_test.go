@@ -19,7 +19,7 @@ func TestWorkerPipeline(t *testing.T) {
 	out := pipeline.Process(nil, in)
 	users := []*user{}
 	go func() {
-		in <- &syncCSVReader{&sync.Mutex{}, csv.NewReader(strings.NewReader(lines))}
+		in <- &syncCSVReader{Reader: csv.NewReader(strings.NewReader(lines))}
 		for {
 			select {
 			case <-printStep.Dead():
@@ -55,12 +55,13 @@ func TestFanOutPipeline(t *testing.T) {
 	printStep := NewFanOutStep("line printer", 5, linePrinter)
 	makeStep := NewFanOutStep("object maker", 5, objectMaker)
 	stage := NewSerialStage("csv consumer", csvStep, printStep, makeStep)
-	pipeline := NewPipeline("csv consumer", stage)
+	pipeline := NewPipeline("csv consumer")
+	pipeline.AddStage(stage)
 	in := make(chan interface{})
 	out := pipeline.Process(nil, in)
 	users := []*user{}
 	go func() {
-		in <- &syncCSVReader{&sync.Mutex{}, csv.NewReader(strings.NewReader(lines))}
+		in <- &syncCSVReader{Reader: csv.NewReader(strings.NewReader(lines))}
 		close(in)
 		for {
 			select {
@@ -97,12 +98,28 @@ func TestBufferedPipeline(t *testing.T) {
 	makeStep.WorkerCount = 5
 	stage := NewSerialStage("csv consumer", csvStep, printStep, makeStep)
 	pipeline := NewPipeline("csv consumer", stage)
+	stateCh := pipeline.State()
+	progressCh := pipeline.AltProgress()
 	in := make(chan interface{})
 	defer close(in)
 	go func() {
-		in <- &syncCSVReader{&sync.Mutex{}, csv.NewReader(strings.NewReader(lines))}
+		in <- &syncCSVReader{Reader: csv.NewReader(strings.NewReader(lines))}
+
+		for {
+			select {
+			case state := <-stateCh:
+				fmt.Println(state)
+			case progress := <-progressCh:
+				fmt.Println(progress)
+			case <-pipeline.Dead():
+				break
+			}
+		}
 	}()
 	out := pipeline.Process(nil, in)
+	if d := pipeline.ElapsedTime(); d.Nanoseconds() == 0 {
+		t.Fatalf("expected elapsed time > 0, found %d nanoseconds", d.Nanoseconds())
+	}
 	users := []*user{}
 	for obj := range out {
 		user := obj.(*user)
@@ -122,7 +139,7 @@ type user struct {
 }
 
 type syncCSVReader struct {
-	*sync.Mutex
+	sync.Mutex
 	*csv.Reader
 }
 
