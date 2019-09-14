@@ -76,12 +76,12 @@ stage := pipeline.NewConcurrentStage(name, step1, ...)
 
 A step is a single processing unit of a pipeline. It takes input in the form of an `interface{}` from a channel, does some work on it, and then should provide the output to another channel.
 
-Steps can be configured in various ways the modify the pipeline and provide flexibility. The kinds of available steps are:
+Steps can be configured in various ways and can modify the pipeline to provide flexibility. The kinds of steps are:
 - worker
 - buffered
 - fan out
 
-It can be created using `pipeline.NewStep(...)` and by default it will create a new worker step with a worker count of 1.
+Steps can be created using `pipeline.NewStep(...)` and by default it will create a new worker step with a worker count of 1.
 
 ### Worker Step
 
@@ -108,6 +108,54 @@ A fan out step creates a step that replicates or fans out the input channel acro
 Fan out steps can be created with:
 ```go
 step := pipeline.NewFanOutStep(name, workerCount, stepFn)
+```
+
+## Tracking Progress
+
+Progress of the pipeline can be tracked in a few ways:
+- elapsed time
+- state changes
+- alternate progress updates
+
+### Elapsed Time
+
+Calling `ElapsedTime()` returns a `time.Duration` based on the start time of the pipeline.
+
+```go
+// Get elapsed time
+t := pipeline.ElapsedTime()
+fmt.Printf("pipeline has been running for %f seconds\n" + t.Seconds())
+```
+
+### State Changes
+
+Pipelines emit a `State` for several changes on a channel. These include a `Status` and progress percentages. Progress is based on the total number of steps in the pipeline.
+
+```go
+// Listen to state changes
+for {
+    select {
+        case state := <-pipeline.State():
+            fmt.Printf("name: %s status: %s progress: %f", state.Name, state.Status.String(), state.Progress)
+        case <-pipeline.Dead()
+            return
+    }
+}
+```
+
+### Alternate Progress Updates
+
+Pipelines also provide an alternate approach to measuring progress. In this model, the `pipeline.Context` provided in each `Step` can be used to configure the total and increment units of work.
+
+```go
+pipeline.Total(unitsOfWork)
+
+func step(ctx *pipeline.Context, in <-chan interface{}, out chan interface{}) error {
+    // Do some work
+    ...
+    // Update progress markers
+    ctx.Inc()
+}
 ```
 
 ## Contibuting
