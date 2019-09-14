@@ -26,8 +26,7 @@ type Step struct {
 	// Defaults to false
 	Buffered bool
 	// FanOut indicates whether workers should perform redundant work, i.e.,
-	// fan out input channels to each one as opposed to using the a
-	// single one.
+	// fan out input channels to each one as opposed to using a single one.
 	// Defaults to false
 	FanOut bool
 	// The number of workers to spawn in go routines to handle this step.

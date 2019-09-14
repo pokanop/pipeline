@@ -28,6 +28,11 @@ func newStage(name string, concurrent bool, steps ...*Step) *Stage {
 	return s
 }
 
+// NewStage creates a new stage, defaults to serial stage.
+func NewStage(name string, steps ...*Step) *Stage {
+	return NewSerialStage(name, steps...)
+}
+
 // NewSerialStage creates a new stage for given steps that will run sequentially.
 func NewSerialStage(name string, steps ...*Step) *Stage {
 	return newStage(name, false, steps...)
