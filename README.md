@@ -5,6 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/containous/traefik/blob/master/LICENSE.md)
 
 # pipeline
+
 pipeline is a package that simplifies creating staged pipelines in `go`.
 
 ![Pipeline](/images/pipeline.png)
@@ -59,6 +60,7 @@ It can be created using `pipeline.NewStage(...)` and by default it will create a
 A serial stage will run all the steps in the stage serially, or one after another. The output from one step will flow into the input of the next step.
 
 Serial stages can be created with:
+
 ```go
 stage := pipeline.NewSerialStage(name, step1, ...)
 ```
@@ -68,6 +70,7 @@ stage := pipeline.NewSerialStage(name, step1, ...)
 A concurrent stage will run all the steps in the stage concurrently, or together. The input for each step will come from the output of the last stage and all the output of the steps in this stage will be provided to the next stage.
 
 Concurrent stages can be created with:
+
 ```go
 stage := pipeline.NewConcurrentStage(name, step1, ...)
 ```
@@ -77,6 +80,7 @@ stage := pipeline.NewConcurrentStage(name, step1, ...)
 A step is a single processing unit of a pipeline. It takes input in the form of an `interface{}` from a channel, does some work on it, and then should provide the output to another channel.
 
 Steps can be configured in various ways and can modify the pipeline to provide flexibility. The kinds of steps are:
+
 - worker
 - buffered
 - fan out
@@ -88,6 +92,7 @@ Steps can be created using `pipeline.NewStep(...)` and by default it will create
 A worker step lets you define the number of workers to spawn in go routines to handle this step. This effectively makes the step concurrent by allowing multiple routines process input.
 
 Worker steps can be created with:
+
 ```go
 step := pipeline.NewWorkerStep(name, workerCount, stepFn)
 ```
@@ -97,6 +102,7 @@ step := pipeline.NewWorkerStep(name, workerCount, stepFn)
 A buffered step creates a step with a buffered output channel allowing data to be buffered while processing. Sending to the output channel doesn't block if the buffer still has space and allows the step to continue reading from the input channel.
 
 Buffered steps can be created with:
+
 ```go
 step := pipeline.NewBufferedStep(name, stepFn)
 ```
@@ -106,6 +112,7 @@ step := pipeline.NewBufferedStep(name, stepFn)
 A fan out step creates a step that replicates or fans out the input channel across a number of workers. In this model, the worker count indicates how many concurrent steps to replicate the input data on. Note that this will process redundant data streams.
 
 Fan out steps can be created with:
+
 ```go
 step := pipeline.NewFanOutStep(name, workerCount, stepFn)
 ```
@@ -113,6 +120,7 @@ step := pipeline.NewFanOutStep(name, workerCount, stepFn)
 ## Tracking Progress
 
 Progress of the pipeline can be tracked in a few ways:
+
 - elapsed time
 - state changes
 - alternate progress updates
@@ -159,6 +167,7 @@ func step(ctx *pipeline.Context, in <-chan interface{}, out chan interface{}) er
 ```
 
 ## Contibuting
+
 Contributions are what makes the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 1. Fork the Project
@@ -168,4 +177,9 @@ Contributions are what makes the open-source community such an amazing place to 
 5. Open a Pull Request
 
 ## License
+
 Distributed under the MIT License.
+
+## If You ♥️ What We Do
+
+<a href="https://www.buymeacoffee.com/pokanopapps" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60" width="217"></a>
